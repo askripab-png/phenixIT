@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phenix-IT - EDF Continuité d'Activité & Résilience SI Vitaux</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fr: {
+                            blue: '#0055A5',
+                            blueDark: '#052962',
+                            blueLight: '#EBF3FA',
+                            red: '#E1000F',
+                            redDark: '#A8000B',
+                            redLight: '#FDE8E9',
+                            grey: '#F5F7FA',
+                            border: '#D0D9E5'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F5F7FA; }
+        ::-webkit-scrollbar-thumb { background: #0055A5; border-radius: 4px; }
+
+        .phenix-card {
+            background-color: #FFFFFF;
+            border: 1px solid #D0D9E5;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(5, 41, 98, 0.04);
+            transition: all 0.2s ease;
+        }
+        .phenix-card:hover {
+            border-color: #0055A5;
+            box-shadow: 0 4px 16px rgba(0, 85, 165, 0.08);
+        }
+
+        .pulse-red {
+            box-shadow: 0 0 0 0 rgba(225, 0, 15, 0.7);
+            animation: pulseRed 1.5s infinite;
+        }
+        @keyframes pulseRed {
+            70% { box-shadow: 0 0 0 10px rgba(225, 0, 15, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(225, 0, 15, 0); }
+        }
+
+        .pulse-green {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulseGreen 2s infinite;
+        }
+        @keyframes pulseGreen {
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+    </style>
+</head>
+<body class="h-full text-slate-800 font-sans flex flex-col antialiased bg-[#F5F7FA]">
+
+    <!-- 1. FRENCH GOVERNMENT & NATIONAL CRITICAL INFRASTRUCTURE OFFICIAL HEADER -->
+    <header class="bg-[#052962] text-white border-b-4 border-[#E1000F] sticky top-0 z-50 shadow-md">
+        <!-- Top Institutional Ribbon -->
+        <div class="bg-[#001D4A] px-4 py-1.5 border-b border-[#0055A5]/40 text-[11px] font-medium flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- French Flag SVG -->
+                <div class="flex h-3.5 w-5 rounded-xs overflow-hidden border border-white/30 shrink-0">
+                    <div class="w-1/3 bg-[#0055A5]"></div>
+                    <div class="w-1/3 bg-white"></div>
+                    <div class="w-1/3 bg-[#E1000F]"></div>
+                </div>
+                <span class="text-slate-200 uppercase tracking-wide font-semibold">République Française • Opérateur de Services Essentiels (OSE) - Secrétariat Général de la Défense et de la Sécurité Nationale (SGDSN)</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-3 font-mono text-slate-300">
+                <span>Classification: <strong class="text-emerald-400">RESTREINT / PROTECTION SI VITEAUX</strong></span>
+                <span>•</span>
+                <span id="current-date-header">2026-10-20</span>
+            </div>
+        </div>
+
+        <!-- Main Phenix-IT Navbar -->
+        <div class="max-w-[1750px] mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Brand & Division Title -->
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shadow-lg border-2 border-fr-blue">
+                        <div class="w-full h-full bg-fr-blue rounded-lg flex items-center justify-center text-white font-black text-xl">
+                            <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="font-black text-white text-lg tracking-tight">PHENIX-IT</h1>
+                            <span class="bg-fr-red text-white text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">PCA & Résilience SI</span>
+                        </div>
+                        <p class="text-xs text-blue-200">EDF - Direction des Systèmes d'Information & Sécurité Nationale</p>
+                    </div>
+                </div>
+
+                <div class="hidden xl:block h-8 w-px bg-blue-700"></div>
+
+                <!-- Operational Level Selector -->
+                <div class="hidden md:flex items-center gap-2 bg-[#003875] px-3 py-1.5 rounded-lg border border-blue-600/50">
+                    <span class="text-xs text-blue-200 font-medium">Poste PCA Active:</span>
+                    <select id="pca-level-select" onchange="changePcaLevel(this.value)" class="bg-[#052962] text-xs font-bold text-white border border-blue-400/40 rounded px-2 py-1 focus:outline-none">
+                        <option value="nominal">NOMINAL (Niveau 1 - Veille)</option>
+                        <option value="vigipirate">VIGIPIRATE CYBER (Niveau 2 - Vigilance)</option>
+                        <option value="crise">CRISE MAJEURE (Niveau 3 - Activation PCO)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Header Quick Status Widgets -->
+            <div class="flex flex-wrap items-center gap-3 text-xs font-mono">
+                
+                <!-- Vital SI Health Counter -->
+                <div class="bg-[#003875] border border-blue-500/30 px-3 py-1.5 rounded-lg flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-green"></span>
+                    <span class="text-blue-100 font-sans">SI Vitaux:</span>
+                    <strong class="text-white font-extrabold text-sm" id="si-online-counter">98 / 98 Actifs</strong>
+                </div>
+
+                <!-- SLA Disaster Recovery Index -->
+                <div class="hidden lg:flex bg-[#003875] border border-blue-500/30 px-3 py-1.5 rounded-lg items-center gap-2">
+                    <i data-lucide="timer" class="w-4 h-4 text-blue-300"></i>
+                    <span class="text-blue-100 font-sans">SLA RTO Moyen:</span>
+                    <strong class="text-emerald-400 font-extrabold text-sm">&lt; 15 min</strong>
+                </div>
+
+                <!-- Global Emergency Trigger Button -->
+                <button onclick="openCrisisModal()" class="bg-fr-red hover:bg-fr-redDark text-white font-bold px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-2 shadow-lg pulse-red">
+                    <i data-lucide="siren" class="w-4 h-4 text-white"></i>
+                    <span class="font-sans text-xs uppercase tracking-wide">Déclencher Alerte PCA</span>
+                </button>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- 2. NAVIGATION BAR & SYSTEM FILTERS -->
+    <nav class="bg-white border-b border-fr-border shadow-sm">
+        <div class="max-w-[1750px] mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Navigation Tabs -->
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-fr-blue text-white flex items-center gap-2 shadow-sm">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                    <span>Tableau de Bord SI Vitaux</span>
+                </button>
+                <button onclick="switchTab('carto')" id="tab-carto" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-fr-blue hover:bg-fr-blueLight flex items-center gap-2">
+                    <i data-lucide="network" class="w-4 h-4"></i>
+                    <span>Cartographie PCA & BIA</span>
+                </button>
+                <button onclick="switchTab('simulator')" id="tab-simulator" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-fr-blue hover:bg-fr-blueLight flex items-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    <span>Simulateur de Crise Cyber</span>
+                </button>
+                <button onclick="switchTab('logbook')" id="tab-logbook" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-fr-blue hover:bg-fr-blueLight flex items-center gap-2 relative">
+                    <i data-lucide="scroll-text" class="w-4 h-4"></i>
+                    <span>Main Courante & Journal PCA</span>
+                    <span id="log-count-badge" class="bg-fr-blue text-white font-mono font-bold text-[10px] px-1.5 py-0.2 rounded-full">3</span>
+                </button>
+            </div>
+
+            <!-- Global Action Controls -->
+            <div class="flex items-center gap-3">
+                <button onclick="triggerFailoverSimulation()" class="bg-fr-blueLight hover:bg-blue-100 text-fr-blue border border-fr-blue/30 font-bold px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                    <span>Simuler Bascule PRA HORS-SITE</span>
+                </button>
+                <button onclick="exportBiaReport()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 border border-slate-300">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                    <span>Rapport BIA (PDF/XML)</span>
+                </button>
+            </div>
+
+        </div>
+    </nav>
+
+    <!-- 3. MAIN DASHBOARD DISPLAY -->
+    <main class="max-w-[1750px] mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+        <!-- TAB 1: VITAL SYSTEMS HEALTH DASHBOARD -->
+        <div id="view-dashboard" class="space-y-6">
+            
+            <!-- Quick Alert Banner -->
+            <div id="status-alert-banner" class="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl border border-emerald-200 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-emerald-100 rounded-lg text-emerald-700">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-extrabold text-emerald-950 text-sm">Dispositif Continuité d'Activité : STATUT NOMINAL</h2>
+                        <p class="text-xs text-emerald-800">Ensemble des réplicateurs PRA Datacenter Lyon/Paris synchronisés sans latence. Aucune alerte prioritaire P0 en cours.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 font-mono text-xs">
+                    <span class="bg-emerald-200/60 text-emerald-900 font-bold px-2.5 py-1 rounded">RPO Max: 0 min</span>
+                    <span class="bg-emerald-200/60 text-emerald-900 font-bold px-2.5 py-1 rounded">PRA Ready: 100%</span>
+                </div>
+            </div>
+
+            <!-- KPI Metric Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="phenix-card p-4 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-600">SI Vitaux P0 (Vital Absolu)</span>
+                        <span class="bg-fr-blueLight text-fr-blue font-bold px-2 py-0.5 rounded text-[10px]">12 Systèmes</span>
+                    </div>
+                    <div class="text-2xl font-black font-mono text-fr-blueDark">100% DISPO</div>
+                    <p class="text-xs text-slate-500">SCADA-Dispatch, SIPRO-Nucléaire, Hydro-Tél</p>
+                </div>
+
+                <div class="phenix-card p-4 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-600">PRA Synchronisation Redondante</span>
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Actif / Actif</span>
+                    </div>
+                    <div class="text-2xl font-black font-mono text-emerald-600">0.02 sec</div>
+                    <p class="text-xs text-slate-500">Latence Réplication Paris-Saclay &lt;--&gt; Lyon</p>
+                </div>
+
+                <div class="phenix-card p-4 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-600">Dernier Exercice PCA Réussi</span>
+                        <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Conforme SGDSN</span>
+                    </div>
+                    <div class="text-2xl font-black font-mono text-fr-blue">14 Oct. 2026</div>
+                    <p class="text-xs text-slate-500">Simulation Bascule PRA Hydro-Centrale</p>
+                </div>
+
+                <div class="phenix-card p-4 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-600">Astreinte RSSI / Cellule PCA</span>
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">24/7 Opérationnel</span>
+                    </div>
+                    <div class="text-2xl font-black font-mono text-fr-blueDark">6 AGENTS</div>
+                    <p class="text-xs text-slate-500">Poste Commandement Informatique (PCO)</p>
+                </div>
+
+            </div>
+
+            <!-- Vital Systems Repository Table -->
+            <div class="phenix-card p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-fr-border pb-3">
+                    <div>
+                        <h3 class="font-extrabold text-fr-blueDark text-base flex items-center gap-2">
+                            <i data-lucide="database" class="w-5 h-5 text-fr-blue"></i>
+                            Référentiel National des SI Vitaux & Systèmes d'Importance Vitale (SIV)
+                        </h3>
+                        <p class="text-xs text-slate-500">Inventaire exhaustif des applications critiques EDF soumises aux directives OSE / PSSI-E</p>
+                    </div>
+
+                    <!-- Criticality Level Filter Buttons -->
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="font-bold text-slate-600">Filtrer par niveau:</span>
+                        <button onclick="filterCriticality('all')" id="btn-crit-all" class="px-2.5 py-1 rounded-lg bg-fr-blue text-white font-bold">Tous (5)</button>
+                        <button onclick="filterCriticality('P0')" id="btn-crit-p0" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">P0 (Vital)</button>
+                        <button onclick="filterCriticality('P1')" id="btn-crit-p1" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold">P1 (Critique)</button>
+                    </div>
+                </div>
+
+                <!-- Systems Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs font-mono">
+                        <thead class="bg-fr-grey text-fr-blueDark border-b border-fr-border font-sans uppercase text-[11px] font-extrabold">
+                            <tr>
+                                <th class="p-3">ID Application</th>
+                                <th class="p-3">Nom du Système Vital</th>
+                                <th class="p-3">Priorité</th>
+                                <th class="p-3">RTO Target</th>
+                                <th class="p-3">RPO Target</th>
+                                <th class="p-3">Redondance PRA</th>
+                                <th class="p-3">Statut PCA</th>
+                                <th class="p-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="si-table-body" class="divide-y divide-fr-border text-slate-800 font-mono">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: CARTOGRAPHIE PCA & BIA -->
+        <div id="view-carto" class="hidden space-y-6">
+            <div class="phenix-card p-5 space-y-4">
+                <div class="border-b border-fr-border pb-3">
+                    <h3 class="font-extrabold text-fr-blueDark text-base flex items-center gap-2">
+                        <i data-lucide="network" class="w-5 h-5 text-fr-blue"></i>
+                        Cartographie des Dépendances d'Infrastructures & BIA (Business Impact Analysis)
+                    </h3>
+                    <p class="text-xs text-slate-500">Matrice de dépendance des processus métiers critiques envers les datacenters et sous-réseaux OT/IT</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- BIA Process Tree -->
+                    <div class="lg:col-span-2 space-y-3">
+                        <h4 class="font-bold text-xs uppercase text-slate-500 font-mono">Arborescence Métier & PRA Associe</h4>
+                        
+                        <!-- Node 1 -->
+                        <div class="p-4 bg-fr-grey rounded-xl border border-fr-border space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-extrabold text-fr-blue text-sm">1. Pilotage de la Production Électrique (Nucléaire & Hydro)</span>
+                                <span class="bg-fr-red text-white text-[10px] font-bold px-2 py-0.5 rounded">Impact Financier: > 15M€/h</span>
+                            </div>
+                            <p class="text-xs text-slate-600">Processus de téléconduite en temps réel. Dépendance vitale vers les réseaux OT sécurisés et liaisons satellites privées.</p>
+                            <div class="flex gap-2 text-[11px] font-mono pt-1">
+                                <span class="bg-white border px-2 py-0.5 rounded font-bold text-fr-blue">BIA Score: 9.9/10</span>
+                                <span class="bg-white border px-2 py-0.5 rounded font-bold text-emerald-700">Procédure PCA-PROD-01 Active</span>
+                            </div>
+                        </div>
+
+                        <!-- Node 2 -->
+                        <div class="p-4 bg-fr-grey rounded-xl border border-fr-border space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-extrabold text-fr-blue text-sm">2. Équilibrage du Réseau & Bilantage Gros (Dispatching)</span>
+                                <span class="bg-fr-red text-white text-[10px] font-bold px-2 py-0.5 rounded">Impact Sureté: MAJEUR</span>
+                            </div>
+                            <p class="text-xs text-slate-600">Assure la stabilité de fréquence 50Hz nationale en coordination avec RTE. Bascule synchrone sous 0 sec en mode PRA.</p>
+                            <div class="flex gap-2 text-[11px] font-mono pt-1">
+                                <span class="bg-white border px-2 py-0.5 rounded font-bold text-fr-blue">BIA Score: 9.8/10</span>
+                                <span class="bg-white border px-2 py-0.5 rounded font-bold text-emerald-700">Procédure PCA-DISP-04 Active</span>
+                            </div>
+                        </div>
+
+                        <!-- Node 3 -->
+                        <div class="p-4 bg-fr-grey rounded-xl border border-fr-border space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="font-extrabold text-fr-blue text-sm">3. Facturation & Marchés de l'Énergie (SAP-Gros)</span>
+                                <span class="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">Impact Financier: Différé</span>
+                            </div>
+                            <p class="text-xs text-slate-600">Système de gestion comptable et boursière. RTO cible fixé à 24h sans compromettre la production physique.</p>
+                            <div class="flex gap-2 text-[11px] font-mono pt-1">
+                                <span class="bg-white border px-2 py-0.5 rounded font-bold text-fr-blue">BIA Score: 6.5/10</span>
+                                <span class="bg-white border px-2 py-0.5 rounded font-bold text-blue-700">Procédure PCA-SAP-12 Planifiée</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datacenter Sites Overview -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-xs uppercase text-slate-500 font-mono">Infrastructure Sites PRA</h4>
+
+                        <div class="p-4 bg-white rounded-xl border-2 border-fr-blue space-y-2">
+                            <div class="flex justify-between items-center">
+                                <strong class="text-fr-blueDark text-sm">Datacenter A (Paris-Saclay)</strong>
+                                <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">PRIMAIRE OK</span>
+                            </div>
+                            <div class="text-xs text-slate-600 font-mono space-y-1">
+                                <div>Alimentation: HTA Raccordé + Groupes 72h</div>
+                                <div>Charge SI Vitaux: 42%</div>
+                                <div>Liaison Fibre Noire: 100 Gbit/s redundée</div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-white rounded-xl border-2 border-fr-blue space-y-2">
+                            <div class="flex justify-between items-center">
+                                <strong class="text-fr-blueDark text-sm">Datacenter B (Lyon-Bugey)</strong>
+                                <span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">PRA MIROIR OK</span>
+                            </div>
+                            <div class="text-xs text-slate-600 font-mono space-y-1">
+                                <div>Alimentation: Indépendante HTA</div>
+                                <div>Synchronisation: Temps Réel Async</div>
+                                <div>Distance Géographique: 420 km</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: SIMULATEUR DE CRISE CYBER & EXERCICES PCA -->
+        <div id="view-simulator" class="hidden space-y-6">
+            <div class="phenix-card p-6 space-y-6">
+                <div class="border-b border-fr-border pb-4 flex flex-wrap justify-between items-center gap-4">
+                    <div>
+                        <h3 class="font-extrabold text-fr-blueDark text-base flex items-center gap-2">
+                            <i data-lucide="zap" class="w-5 h-5 text-fr-red"></i>
+                            Simulateur Interactif de Crise Informatique & Attaque Cyber (PCO)
+                        </h3>
+                        <p class="text-xs text-slate-500">Moteur d'exercices PCA pour tester le temps de réaction des cellules de crise et la bascule PRA</p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-mono font-bold text-slate-600">Statut Simulateur:</span>
+                        <span id="sim-status-badge" class="bg-slate-200 text-slate-700 font-mono font-bold text-xs px-2.5 py-1 rounded-lg">EN ATTENTE</span>
+                    </div>
+                </div>
+
+                <!-- Scenario Selection Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- Scenario 1 -->
+                    <div onclick="selectScenario('ransomware')" id="scen-card-ransomware" class="p-4 rounded-xl border-2 border-slate-200 hover:border-fr-blue cursor-pointer bg-fr-grey space-y-2 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-extrabold text-fr-red text-xs uppercase">Scénario 1 (Cyber)</span>
+                            <span class="bg-fr-redLight text-fr-red font-bold text-[10px] px-2 py-0.5 rounded">Ransomware OT</span>
+                        </div>
+                        <h4 class="font-extrabold text-fr-blueDark text-sm">Attaque Ransomware sur Réseau Hydro</h4>
+                        <p class="text-xs text-slate-600">Infiltration via un sous-traitant. Tentative de chiffrement des serveurs de téléconduite barrages.</p>
+                    </div>
+
+                    <!-- Scenario 2 -->
+                    <div onclick="selectScenario('datacenter')" id="scen-card-datacenter" class="p-4 rounded-xl border-2 border-slate-200 hover:border-fr-blue cursor-pointer bg-fr-grey space-y-2 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-extrabold text-fr-blue text-xs uppercase">Scénario 2 (Physique)</span>
+                            <span class="bg-fr-blueLight text-fr-blue font-bold text-[10px] px-2 py-0.5 rounded">Perte Datacenter A</span>
+                        </div>
+                        <h4 class="font-extrabold text-fr-blueDark text-sm">Coupure Électrique & Incendie Saclay</h4>
+                        <p class="text-xs text-slate-600">Perte totale du Datacenter A. Nécessite bascule PRA automatique sur Lyon sous 15 minutes.</p>
+                    </div>
+
+                    <!-- Scenario 3 -->
+                    <div onclick="selectScenario('satcom')" id="scen-card-satcom" class="p-4 rounded-xl border-2 border-slate-200 hover:border-fr-blue cursor-pointer bg-fr-grey space-y-2 transition-all">
+                        <div class="flex justify-between items-center">
+                            <span class="font-extrabold text-amber-600 text-xs uppercase">Scénario 3 (Télécom)</span>
+                            <span class="bg-amber-100 text-amber-800 font-bold text-[10px] px-2 py-0.5 rounded">Rupture Fibre</span>
+                        </div>
+                        <h4 class="font-extrabold text-fr-blueDark text-sm">Section de Fibre Noire Inter-Datacenters</h4>
+                        <p class="text-xs text-slate-600">Isolation réseau entre Paris et Lyon. Bascule impérative sur secours satellite Iridium/Starlink.</p>
+                    </div>
+
+                </div>
+
+                <!-- Simulation Control Panel & Live Output -->
+                <div class="p-5 bg-fr-blueDark text-white rounded-2xl space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-blue-700/60 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-fr-red pulse-red" id="sim-led"></div>
+                            <span class="font-mono text-xs text-blue-200">Scénario Sélectionné: <strong class="text-white font-extrabold" id="selected-scen-title">Ransomware sur Réseau Hydro</strong></span>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <button onclick="startCrisisSimulation()" id="btn-start-sim" class="bg-fr-red hover:bg-fr-redDark text-white font-bold px-4 py-2 rounded-xl text-xs transition-all shadow-md flex items-center gap-2">
+                                <i data-lucide="play" class="w-4 h-4"></i>
+                                <span>Lancer l'Exercice de Crise</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live Simulation Logs Window -->
+                    <div class="bg-[#00173B] rounded-xl p-4 font-mono text-xs h-48 overflow-y-auto border border-blue-900/80 space-y-2 text-slate-300" id="sim-log-terminal">
+                        <div class="text-slate-500">[SYSTEM] Attente du lancement de l'exercice... Choisissez un scénario et cliquez sur "Lancer l'Exercice".</div>
+                    </div>
+
+                    <!-- Impact Matrix During Sim -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono pt-2">
+                        <div class="bg-[#002861] p-2.5 rounded-lg border border-blue-700/50">
+                            <span class="text-blue-300 block text-[10px]">Temps Écoulé:</span>
+                            <strong class="text-white text-base" id="sim-timer">00:00:00</strong>
+                        </div>
+                        <div class="bg-[#002861] p-2.5 rounded-lg border border-blue-700/50">
+                            <span class="text-blue-300 block text-[10px]">Impact RTO:</span>
+                            <strong class="text-emerald-400 text-base" id="sim-rto-status">0 min / 15 min</strong>
+                        </div>
+                        <div class="bg-[#002861] p-2.5 rounded-lg border border-blue-700/50">
+                            <span class="text-blue-300 block text-[10px]">Systèmes Impactés:</span>
+                            <strong class="text-white text-base" id="sim-impact-count">0 / 98</strong>
+                        </div>
+                        <div class="bg-[#002861] p-2.5 rounded-lg border border-blue-700/50">
+                            <span class="text-blue-300 block text-[10px]">Isolement Réseau:</span>
+                            <strong class="text-slate-300 text-base" id="sim-isolation-status">INACTIF</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: MAIN COURANTE & JOURNAL PCA -->
+        <div id="view-logbook" class="hidden space-y-6">
+            <div class="phenix-card p-5 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-fr-border pb-3">
+                    <div>
+                        <h3 class="font-extrabold text-fr-blueDark text-base flex items-center gap-2">
+                            <i data-lucide="scroll-text" class="w-5 h-5 text-fr-blue"></i>
+                            Main Courante Officielle PCO / PCA
+                        </h3>
+                        <p class="text-xs text-slate-500">Journal d'événements infalsifiable pour le suivi de la sécurité nationale et des exercices</p>
+                    </div>
+
+                    <button onclick="addManualLogEntry()" class="bg-fr-blue text-white font-bold text-xs px-3.5 py-2 rounded-xl hover:bg-fr-blueDark transition-all flex items-center gap-1.5">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        <span>Ajouter Entrée Consigne</span>
+                    </button>
+                </div>
+
+                <!-- Log Entries List -->
+                <div class="space-y-3" id="log-entries-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- CRISIS EMERGENCY MODAL -->
+    <div id="modal-crisis" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border-2 border-fr-red p-6 max-w-lg w-full shadow-2xl space-y-5">
+            <div class="flex items-center gap-3 text-fr-red">
+                <div class="p-3 bg-fr-redLight rounded-xl">
+                    <i data-lucide="siren" class="w-7 h-7 text-fr-red"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-fr-blueDark text-lg">Activation Procédure Alerte Majeure PCA</h3>
+                    <p class="text-xs text-fr-red font-bold">PROTOCOLE CONFIDENTIEL DEFENSE EDF</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed">
+                Vous êtes sur le point de déclencher la procédure d'alerte maximale PCA. Cette action notifie immédiatement l'astreinte RSSI Groupe, la Direction Générale EDF et bascule le niveau opérationnel en <strong>CRISE MAJEURE</strong>.
+            </p>
+
+            <div class="p-3 bg-fr-grey rounded-xl border border-fr-border space-y-1 text-xs font-mono">
+                <div>Opérateur: <strong class="text-fr-blueDark">AGENT_DSI_8804 (RSSI-Défense)</strong></div>
+                <div>Poste de Commande: <strong class="text-fr-blueDark">PCO-National-Saclay</strong></div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeCrisisModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">
+                    Annuler
+                </button>
+                <button onclick="confirmCrisisTrigger()" class="px-5 py-2 bg-fr-red hover:bg-fr-redDark text-white font-bold text-xs rounded-xl shadow-lg">
+                    Confirmer & Diffuser l'Alerte
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- 4. JAVASCRIPT PHENIX-IT APPLICATION LOGIC -->
+    <script>
+        // SI Vitaux Mock Dataset
+        let siVitauxList = [
+            { id: 'SIV-01', name: 'SCADA-Dispatch National (SOGREAH/GDR)', crit: 'P0', rto: '0h (Synchrone)', rpo: '0 min', pra: 'Actif/Actif Lyon-Paris', status: 'OPERATIONNEL' },
+            { id: 'SIV-02', name: 'SIPRO-Nucléaire (Pilotage Tranches CPR/CPY)', crit: 'P0', rto: '15 min', rpo: '0 min', pra: 'PRA HORS-SITE OK', status: 'NOMINAL' },
+            { id: 'SIV-03', name: 'Système Téléconduite Barrages Hydro', crit: 'P0', rto: '30 min', rpo: '5 min', pra: 'Redondé Satellite', status: 'OPERATIONNEL' },
+            { id: 'SIV-04', name: 'GIGA-Grid Metering & Bilantations', crit: 'P1', rto: '4h', rpo: '1h', pra: 'Miroir Asynchrone', status: 'NOMINAL' },
+            { id: 'SIV-05', name: 'SAP-Finance & Facturation Marché de Gros', crit: 'P1', rto: '24h', rpo: '2h', pra: 'Sauvegarde Quotidienne', status: 'MAINTENANCE' }
+        ];
+
+        let logEntries = [
+            { time: '15:10:00', author: 'SYS_AUTOMAT', type: 'INFO', text: 'Test de cohérence des réplicateurs PRA Datacenter Bugey terminé avec succès.' },
+            { time: '14:30:12', author: 'RSSI_GROUPE', type: 'ALERT', text: 'Passage du niveau de vigilance en mode VIGIPIRATE CYBER préventif suite bulletin ANSSI.' },
+            { time: '09:00:00', author: 'CELLULE_PCA', type: 'INFO', text: 'Prise de poste astreinte PCO Sécurité Nationale effectuée par l\'équipe Alpha.' }
+        ];
+
+        let simInterval = null;
+        let simSeconds = 0;
+        let activeScenario = 'ransomware';
+
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            ['dashboard', 'carto', 'simulator', 'logbook'].forEach(t => {
+                const view = document.getElementById(`view-${t}`);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    view.classList.remove('hidden');
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all bg-fr-blue text-white flex items-center gap-2 shadow-sm";
+                } else {
+                    view.classList.add('hidden');
+                    btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-600 hover:text-fr-blue hover:bg-fr-blueLight flex items-center gap-2";
+                }
+            });
+        }
+
+        // Render SI Vitaux Table
+        function renderSiTable(filter = 'all') {
+            const tbody = document.getElementById('si-table-body');
+            tbody.innerHTML = '';
+
+            siVitauxList.forEach(si => {
+                if (filter !== 'all' && si.crit !== filter) return;
+
+                let critBadge = si.crit === 'P0' ? 'bg-fr-redLight text-fr-red border border-fr-red/30' : 'bg-fr-blueLight text-fr-blue border border-fr-blue/30';
+                let statusBadge = si.status === 'OPERATIONNEL' || si.status === 'NOMINAL' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-fr-blueLight/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-fr-blue">${si.id}</td>
+                    <td class="p-3 font-extrabold text-fr-blueDark font-sans">${si.name}</td>
+                    <td class="p-3"><span class="font-bold px-2 py-0.5 rounded text-[10px] ${critBadge}">${si.crit}</span></td>
+                    <td class="p-3 text-slate-700">${si.rto}</td>
+                    <td class="p-3 text-slate-700">${si.rpo}</td>
+                    <td class="p-3 text-slate-600">${si.pra}</td>
+                    <td class="p-3"><span class="font-bold px-2 py-0.5 rounded text-[10px] ${statusBadge}">${si.status}</span></td>
+                    <td class="p-3 text-right font-sans">
+                        <button onclick="triggerSiFailover('${si.id}')" class="bg-fr-blueLight hover:bg-fr-blue hover:text-white text-fr-blue border border-fr-blue/40 font-bold text-[11px] px-2.5 py-1 rounded-lg transition-all">
+                            Tester PRA
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterCriticality(crit) {
+            ['all', 'p0', 'p1'].forEach(c => {
+                const btn = document.getElementById(`btn-crit-${c}`);
+                if (c === crit.toLowerCase()) {
+                    btn.className = "px-2.5 py-1 rounded-lg bg-fr-blue text-white font-bold";
+                } else {
+                    btn.className = "px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold";
+                }
+            });
+            renderSiTable(crit);
+        }
+
+        // Individual Failover Test Simulation
+        function triggerSiFailover(siId) {
+            const item = siVitauxList.find(s => s.id === siId);
+            if (!item) return;
+
+            item.status = 'BASCULE PRA EN COURS';
+            renderSiTable();
+            showToast('Bascule PRA Initiée', `Miroir actif engagé pour ${item.name}`, 'info');
+
+            setTimeout(() => {
+                item.status = 'OPERATIONNEL (PRA)';
+                renderSiTable();
+                showToast('Bascule PRA Terminée', `${item.name} basculé sur Datacenter Bugey sous 4.2 sec`, 'success');
+            }, 2500);
+        }
+
+        // Global PRA Failover Trigger
+        function triggerFailoverSimulation() {
+            showToast('Bascule Globale PRA Engagée', 'Ordre de bascule envoyé aux 12 réplicateurs de production', 'warning');
+            siVitauxList.forEach(s => s.status = 'BASCULE PRA');
+            renderSiTable();
+
+            setTimeout(() => {
+                siVitauxList.forEach(s => s.status = 'OPERATIONNEL');
+                renderSiTable();
+                showToast('Synchronisation Réussie', 'Ensemble des SI Vitaux basculés sur le réseau de secours HORS-SITE', 'success');
+            }, 3000);
+        }
+
+        // Scenario Selection
+        function selectScenario(scen) {
+            activeScenario = scen;
+            ['ransomware', 'datacenter', 'satcom'].forEach(s => {
+                const card = document.getElementById(`scen-card-${s}`);
+                if (s === scen) {
+                    card.className = "p-4 rounded-xl border-2 border-fr-blue bg-fr-blueLight/40 space-y-2 transition-all shadow-md";
+                } else {
+                    card.className = "p-4 rounded-xl border-2 border-slate-200 hover:border-fr-blue cursor-pointer bg-fr-grey space-y-2 transition-all";
+                }
+            });
+
+            const titles = {
+                ransomware: 'Attaque Ransomware sur Réseau Hydro',
+                datacenter: 'Coupure Électrique & Incendie Datacenter A',
+                satcom: 'Section de Fibre Noire Inter-Datacenters'
+            };
+            document.getElementById('selected-scen-title').textContent = titles[scen];
+        }
+
+        // Start Crisis Simulation
+        function startCrisisSimulation() {
+            const terminal = document.getElementById('sim-log-terminal');
+            const badge = document.getElementById('sim-status-badge');
+            
+            badge.className = "bg-fr-red text-white font-mono font-bold text-xs px-2.5 py-1 rounded-lg animate-pulse";
+            badge.textContent = "EXERCICE EN COURS";
+
+            terminal.innerHTML = `<div class="text-fr-red font-bold">[00:00:01] INITIATION DE L'EXERCICE DE CRISE CYBER - SCÉNARIO: ${activeScenario.toUpperCase()}</div>`;
+            
+            simSeconds = 0;
+            if (simInterval) clearInterval(simInterval);
+
+            simInterval = setInterval(() => {
+                simSeconds++;
+                const hrs = String(Math.floor(simSeconds / 3600)).padStart(2, '0');
+                const mins = String(Math.floor((simSeconds % 3600) / 60)).padStart(2, '0');
+                const secs = String(simSeconds % 60).padStart(2, '0');
+                document.getElementById('sim-timer').textContent = `${hrs}:${mins}:${secs}`;
+
+                if (simSeconds === 3) {
+                    terminal.innerHTML += `<div class="text-amber-400">[00:00:03] ALERTE: Isolation automatique du sous-réseau OT engagée.</div>`;
+                    document.getElementById('sim-isolation-status').textContent = "ACTIF (ISOLÉ)";
+                    document.getElementById('sim-isolation-status').className = "text-emerald-400 text-base font-bold";
+                    document.getElementById('sim-impact-count').textContent = "1 / 98";
+                }
+
+                if (simSeconds === 6) {
+                    terminal.innerHTML += `<div class="text-blue-300">[00:00:06] PCA: Bascule automatique du système SCADA-Dispatch vers le miroir Lyon-Bugey.</div>`;
+                    document.getElementById('sim-rto-status').textContent = "3 min / 15 min";
+                }
+
+                if (simSeconds === 10) {
+                    terminal.innerHTML += `<div class="text-emerald-400 font-bold">[00:00:10] SUCCÈS: Continuité d'activité garantie. Temps de bascule effectif: 4.8 secondes. RTO respecté.</div>`;
+                    badge.className = "bg-emerald-600 text-white font-mono font-bold text-xs px-2.5 py-1 rounded-lg";
+                    badge.textContent = "EXERCICE RÉUSSI";
+                    clearInterval(simInterval);
+                }
+
+                terminal.scrollTop = terminal.scrollHeight;
+            }, 1000);
+        }
+
+        // PCA Operational Level Switcher
+        function changePcaLevel(val) {
+            const banner = document.getElementById('status-alert-banner');
+            if (val === 'crise') {
+                banner.className = "p-4 bg-fr-redLight border-l-4 border-fr-red rounded-r-xl border border-fr-red/30 flex flex-wrap items-center justify-between gap-4";
+                banner.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-fr-red text-white rounded-lg pulse-red">
+                            <i data-lucide="siren" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-extrabold text-fr-redDark text-sm">DISPOSITIF PCA : CRISE MAJEURE ACTIVÉE</h2>
+                            <p class="text-xs text-fr-redDark">Cellule de crise PCO rassemblée au PC Sécurité Saclay. Bascule générale PRA prête.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                banner.className = "p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl border border-emerald-200 flex flex-wrap items-center justify-between gap-4";
+                banner.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-emerald-100 rounded-lg text-emerald-700">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-extrabold text-emerald-950 text-sm">Dispositif Continuité d'Activité : STATUT NOMINAL</h2>
+                            <p class="text-xs text-emerald-800">Ensemble des réplicateurs PRA Datacenter Lyon/Paris synchronisés sans latence.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        // Render Logbook
+        function renderLogbook() {
+            const container = document.getElementById('log-entries-container');
+            container.innerHTML = '';
+
+            logEntries.forEach(log => {
+                const card = document.createElement('div');
+                let borderColor = log.type === 'ALERT' ? 'border-l-4 border-l-fr-red bg-fr-redLight/30' : 'border-l-4 border-l-fr-blue bg-fr-blueLight/30';
+
+                card.className = `phenix-card p-4 space-y-1 ${borderColor}`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-center text-xs font-mono">
+                        <span class="font-bold text-fr-blueDark">${log.author}</span>
+                        <span class="text-slate-500">${log.time}</span>
+                    </div>
+                    <p class="text-xs text-slate-700 font-sans">${log.text}</p>
+                `;
+                container.appendChild(card);
+            });
+            document.getElementById('log-count-badge').textContent = logEntries.length;
+        }
+
+        function addManualLogEntry() {
+            const text = prompt("Saisissez la nouvelle consigne de la main courante PCA:");
+            if (text) {
+                const now = new Date().toTimeString().split(' ')[0];
+                logEntries.unshift({ time: now, author: 'OPERATEUR_PCO', type: 'INFO', text: text });
+                renderLogbook();
+                showToast('Consigne Enregistrée', 'Entrée ajoutée à la main courante officielle', 'info');
+            }
+        }
+
+        // Crisis Modal Controls
+        function openCrisisModal() {
+            document.getElementById('modal-crisis').classList.remove('hidden');
+        }
+
+        function closeCrisisModal() {
+            document.getElementById('modal-crisis').classList.add('hidden');
+        }
+
+        function confirmCrisisTrigger() {
+            closeCrisisModal();
+            document.getElementById('pca-level-select').value = 'crise';
+            changePcaLevel('crise');
+            showToast('ALERTE MAJEURE DIFFUSÉE', 'Cellule de Crise PCA convoquée immédiatement', 'danger');
+        }
+
+        function exportBiaReport() {
+            showToast('Génération du Rapport BIA', 'Rapport de continuité d\'activité exporté au format XML/PDF', 'success');
+        }
+
+        // Toast Engine
+        function showToast(title, msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            let colorBorder = 'border-fr-blue';
+            if (type === 'danger') colorBorder = 'border-fr-red';
+            if (type === 'warning') colorBorder = 'border-amber-500';
+            if (type === 'success') colorBorder = 'border-emerald-500';
+
+            toast.className = `pointer-events-auto bg-white border-l-4 ${colorBorder} border border-fr-border text-slate-800 p-3.5 rounded-xl shadow-2xl space-y-1 max-w-sm font-sans text-xs flex items-start gap-3`;
+            toast.innerHTML = `
+                <div class="p-1.5 rounded-lg bg-fr-blueLight text-fr-blue shrink-0">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-fr-blueDark">${title}</div>
+                    <div class="text-slate-600">${msg}</div>
+                </div>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => { toast.remove(); }, 4000);
+        }
+
+        // Init App
+        window.onload = function() {
+            lucide.createIcons();
+            renderSiTable();
+            renderLogbook();
+        };
+    </script>
+</body>
+</html>
